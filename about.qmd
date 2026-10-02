@@ -1,0 +1,20 @@
+---
+title: "About"
+about:
+  template: jolla
+  links:
+    - icon: github
+      text: GitHub
+      href: https://github.com/CJosh88
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/YOUR-LINKEDIN
+    - icon: envelope
+      text: Email
+      href: mailto:you@example.com
+---
+
+Hi, I'm **Your Name**. I write small, honest experiments on new ML and AI releases:
+what they do, how they compare to a well-known baseline, and where they fall short.
+
+Every post is a notebook with pinned versions and an *Open in Colab* button, so you can rerun it yourself.

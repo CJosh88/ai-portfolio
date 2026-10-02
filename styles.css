@@ -1,0 +1,8 @@
+/* Keep wide outputs (DataFrames, logs) from breaking the layout */
+.cell-output, .cell-output-display { overflow-x: auto; }
+.cell-output-display img { max-width: 100%; height: auto; }
+
+/* Mermaid diagrams: the theme fills subgraphs dark grey, which hides the labels.
+   Use outlined, transparent subgraphs that follow the light/dark theme colours. */
+svg .cluster rect { fill: transparent !important; stroke: var(--mermaid-fg-color) !important; stroke-dasharray: 4 3; }
+svg .cluster .nodeLabel, svg .cluster-label, svg .cluster-label span { color: var(--mermaid-fg-color) !important; fill: var(--mermaid-fg-color) !important; font-weight: 600; }

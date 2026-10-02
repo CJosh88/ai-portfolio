@@ -1,0 +1,36 @@
+project:
+  type: website
+  output-dir: _site
+  # Render the site pages, article posts (index.qmd) and experiment notebooks.
+  # (Each experiment folder's README.md stays a GitHub-only file.)
+  render:
+    - "*.qmd"
+    - "experiments/*/index.qmd"
+    - "experiments/*/notebook.ipynb"
+
+website:
+  title: "Josh's AI/ML Experiments"
+  site-url: https://CJosh88.github.io/ai-portfolio
+  description: "Small, reproducible experiments with new ML/AI releases."
+  open-graph: true          # nice link previews on LinkedIn
+  twitter-card: true
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/CJosh88
+      - icon: linkedin
+        href: https://www.linkedin.com/in/josh-chettiar-9650b796/
+      - icon: rss
+        href: index.xml
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    code-copy: true
+    code-overflow: wrap
+    highlight-style: github

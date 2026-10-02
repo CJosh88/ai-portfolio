@@ -1,0 +1,8 @@
+# Defaults applied to every experiment notebook.
+author: "Josh Chettiar"
+execute:
+  enabled: false     # never re-run notebooks in CI; publish the outputs you saved
+format:
+  html:
+    code-fold: false
+    toc: true

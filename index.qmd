@@ -1,0 +1,19 @@
+---
+title: "AI/ML Experiments"
+subtitle: "Hands-on tests of new models, libraries and releases. Every post comes with a runnable notebook."
+listing:
+  contents:
+    - "experiments/*/index.qmd"
+    - "experiments/*/notebook.ipynb"
+  # Notebooks tagged "notebook" are companions to an index.qmd article, not posts of their own.
+  exclude:
+    categories: "notebook"
+  sort: "date desc"
+  type: default
+  categories: true
+  filter-ui: true
+  sort-ui: false
+  feed: true
+page-layout: full
+title-block-banner: true
+---
