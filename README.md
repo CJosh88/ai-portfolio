@@ -1,4 +1,4 @@
-# ML Experiments
+# AI/ML Experiments
 
 Small, reproducible experiments with new ML/AI releases, published as a blog at
 **https://CJosh88.github.io/ai-portfolio**.
