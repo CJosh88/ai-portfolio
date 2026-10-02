@@ -8,13 +8,10 @@ about:
       href: https://github.com/CJosh88
     - icon: linkedin
       text: LinkedIn
-      href: https://www.linkedin.com/in/YOUR-LINKEDIN
-    - icon: envelope
-      text: Email
-      href: mailto:you@example.com
+      href: https://www.linkedin.com/in/josh-chettiar-9650b796/
 ---
 
-Hi, I'm **Your Name**. I write small, honest experiments on new ML and AI releases:
+Hi, I'm **Josh Chettiar**. I write small, honest experiments on new ML and AI releases:
 what they do, how they compare to a well-known baseline, and where they fall short.
 
-Every post is a notebook with pinned versions and an *Open in Colab* button, so you can rerun it yourself.
+Every post comes with a notebook with pinned versions and an *Open in Colab* button, so you can rerun it yourself.
