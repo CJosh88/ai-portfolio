@@ -1,6 +1,6 @@
 ---
-title: "AI/ML Experiments"
-subtitle: "Hands-on tests of new models, libraries and releases. Every post comes with a runnable notebook."
+title: "Everything AI/ML"
+subtitle: "Thought pieces and hands-on tests of new models, libraries and releases. Almost every post comes with a runnable notebook."
 listing:
   contents:
     - "experiments/*/index.qmd"
