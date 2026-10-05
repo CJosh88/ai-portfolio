@@ -9,7 +9,7 @@ project:
     - "experiments/*/notebook.ipynb"
 
 website:
-  title: "Josh's AI/ML Experiments"
+  title: "Josh's AI/ML Thoughts & Experiments"
   site-url: https://CJosh88.github.io/ai-portfolio
   description: "Small, reproducible experiments with new ML/AI releases."
   open-graph: true          # nice link previews on LinkedIn
