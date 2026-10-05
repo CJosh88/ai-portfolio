@@ -11,7 +11,4 @@ about:
       href: https://www.linkedin.com/in/josh-chettiar-9650b796/
 ---
 
-Hi, I'm **Josh Chettiar**. I write small, honest experiments on new ML and AI releases:
-what they do, how they compare to a well-known baseline, and where they fall short.
-
-Every post comes with a notebook with pinned versions and an *Open in Colab* button, so you can rerun it yourself.
+To-Do
