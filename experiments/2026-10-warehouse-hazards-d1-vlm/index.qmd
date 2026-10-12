@@ -150,7 +150,7 @@ In practice you'd flag an image for a person to check when P(hazard) passes a th
 2. **Fine-tuning still earned its place, for different reasons than I expected.** It didn't beat a well-prompted larger model on accuracy. It named the hazards correctly where zero-shot models confused them, and did it 2.5× faster in a third of the memory.
 3. **Choose thresholds on held-out data.** Once each model's threshold was set on 100 labelled images, the best models were level on hazards caught and false alarms, whichever way they were built.
 4. **d1's benefit here was calibration, not accuracy.** It shipped with honest probabilities, which is useful. But one temperature fitted on 100 labelled images gave its base model the same.
-5. **Higher accuracy can mean more missed hazards.** The author's definitions raised d1-3B's accuracy by 10 points while it caught fewer hazards. As in [my last experiment](../2026-10-decision-models-cssrs/), accuracy alone hides the errors that matter.
+5. **Higher accuracy can mean more missed hazards.** The author's definitions raised d1-3B's accuracy by 10 points while it caught fewer hazards. Accuracy alone hides the errors that matter.
 
 ## Limitations
 
