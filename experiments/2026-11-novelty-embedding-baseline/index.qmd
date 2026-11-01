@@ -14,7 +14,7 @@ image: figures/method_diagram.png
 ## TL;DR
 
 - **The question:** with no LLM at all, can distance to prior work tell which of two research ideas is more novel, on the same items Ai2 used to test LLM judges?
-- **Roughly as well as a small judge.** With the BGE-M3 embedding model, the simplest distance score picked the more novel idea in 60% of 154 human-written pairs (95% confidence interval 53% to 68%). A 3B LLM judge using Ai2's prompts scored 55% to 58%, and the two are not significantly different.
+- **Roughly as well as a small judge.** With the BGE-M3 embedding model, the simplest distance score picked the more novel idea in 60% of 154 human-written pairs (95% confidence interval 53% to 68%). A 3B LLM judge using Ai2's prompts scored 55% to 58%, and the two are not significantly different. Both cheap methods sit roughly halfway between chance and the frontier.
 - **Nowhere near the frontier.** Ai2's six frontier judges scored 74% to 84% on the same pairs.
 - **The embedding model matters as much as the metric.** With the smaller bge-small model, every distance score was at chance.
 - **The small judge's weakness was order, not wording.** Its verdict flipped on 87% of pairs when the two ideas swapped places.
@@ -189,6 +189,7 @@ The corpus embedding is the expensive part of distance, and it is paid once. Aft
 - **The judge is small and didn't reason.** Reading probabilities after an empty reasoning block understates what Qwen2.5-3B can do. It is a cheap baseline, not a rerun of Ai2's judges.
 - **One corpus snapshot.** Papers with Code ends in July 2025 and leans towards papers with code and benchmarks, so recent or theory-heavy prior work is missing, which makes some ideas look more novel than they are.
 - **The leakage filter is a blunt tool.** A heavily rewritten preprint below 0.95 still counts as prior work against its own idea, and a few genuinely earlier papers above it were removed.
+- **Rewritten ideas, raw corpus.** The benchmark ideas are abstracts Ai2 rewrote with Claude Opus 4.6 to strip out results, while the corpus holds original abstracts. For the 31 ideas whose original is in the corpus, the rewrite moved each text far less than the distance to its nearest other paper: median cosine to its own original was 0.99 with bge-small and 0.98 with BGE-M3, against 0.91 and 0.77 to the nearest other paper. A shift shared by all ideas cancels out in pairs, but the part that varies from idea to idea adds noise unrelated to novelty, and may be part of why distance tops out around 60%. BGE-M3 also put 8 of those 31 ideas below 0.95 from their own original, so its cosine threshold alone would have missed them; the ID and title check caught them. On Human+Generated, both sides are LLM text (Opus rewrites of real abstracts against ideas Sonnet 4.5 wrote from scratch), so that split's effect is best read as real-paper ideas against generated ones, whether through content or style.
 - **Labels mined from reviews** mix novelty with quality, and the frontier numbers are read off Ai2's figure, not rerun.
 
 ## What I'd test next
