@@ -1,8 +1,9 @@
 ---
-title: "Judging research novelty without an LLM: embedding distance matched a small judge, not the frontier"
+title: "Judging research novelty cheaply: distance matched a 3B judge, and a 4B model came close to the frontier"
 subtitle: "Embedding-distance novelty metrics vs LLM-as-judge on Ai2's new novelty benchmark"
-description: "On 154 pairs of human-written ICLR 2026 ideas, distance to prior work in BGE-M3 embedding space picked the more novel idea 60% of the time. That is level with a 3B LLM judge on Ai2's own prompts, and well short of the 74% to 84% that Ai2's frontier judges reach."
+description: "On 154 pairs of human-written ICLR 2026 ideas, distance to prior work in BGE-M3 embedding space picked the more novel idea 60% of the time, level with a 3B LLM judge. Qwen3-4B reached 69% without reasoning and 72% with it, close to the 74% to 84% of Ai2's frontier judges."
 date: 2026-11-01
+date-modified: 2026-11-06
 categories: [evaluation, embeddings, llm-as-judge, research, benchmarks]
 image: figures/method_diagram.png
 ---
@@ -10,15 +11,20 @@ image: figures/method_diagram.png
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/CJosh88/ML/blob/main/experiments/2026-11-novelty-embedding-baseline/notebook.ipynb)
 [Code and data on GitHub](https://github.com/CJosh88/ML/tree/main/experiments/2026-11-novelty-embedding-baseline)
 
+::: {.callout-tip appearance="simple"}
+**Updated 6 November 2026:** I added a reasoning judge, Qwen3-4B with its thinking mode off and on. It changed the picture more than I expected. See [Does reasoning help?](#does-reasoning-help)
+:::
+
 ::: {.callout-note appearance="simple"}
 ## TL;DR
 
 - **The question:** with no LLM at all, can distance to prior work tell which of two research ideas is more novel, on the same items Ai2 used to test LLM judges?
-- **Roughly as well as a small judge.** With the BGE-M3 embedding model, the simplest distance score picked the more novel idea in 60% of 154 human-written pairs (95% confidence interval 53% to 68%). A 3B LLM judge using Ai2's prompts scored 55% to 58%, and the two are not significantly different. Both cheap methods sit roughly halfway between chance and the frontier.
-- **Nowhere near the frontier.** Ai2's six frontier judges scored 74% to 84% on the same pairs.
+- **Distance roughly matched a 3B judge.** With the BGE-M3 embedding model, the simplest distance score picked the more novel idea in 60% of 154 human-written pairs (95% confidence interval 53% to 68%). A 3B LLM judge using Ai2's prompts scored 55% to 58%, and the two are not significantly different. Both sit roughly halfway between chance and the frontier.
+- **A newer 4B model came close to the frontier.** Qwen3-4B scored 69% without reasoning and 72% with it. Ai2's six frontier judges scored 74% to 84% on the same pairs.
+- **Reasoning barely helped.** Letting Qwen3-4B think first added 3 points, which is not significant, and made it about 27 times slower. Most of the gain came from the newer model.
 - **The embedding model matters as much as the metric.** With the smaller bge-small model, every distance score was at chance.
-- **The small judge's weakness was order, not wording.** Its verdict flipped on 87% of pairs when the two ideas swapped places.
-- **Mixed human and LLM-written pairs mostly measure who wrote the idea**, for distance and judges alike.
+- **The small judges' weakness was order, not wording.** Their verdicts flipped on 45% to 87% of pairs when the two ideas swapped places.
+- **Mixed human and LLM-written pairs mostly measure who wrote the idea**, for distance and judges alike, with or without reasoning.
 :::
 
 ## Why I ran this
@@ -63,29 +69,29 @@ The practical differences matter as much as accuracy. Distance gives the same an
 | **Benchmark** | [allenai/novelty-judge-bench](https://huggingface.co/datasets/allenai/novelty-judge-bench) (ODC-BY), pinned to one revision: 154 pairs per split, plus single-idea versions |
 | **Prior work** | 576k ML papers with abstracts from the [Papers with Code archive](https://huggingface.co/datasets/pwc-archive/papers-with-abstracts) (CC BY-SA 4.0), which stops in July 2025, two months before the ICLR 2026 deadline |
 | **Embedding models** | bge-small-en-v1.5 (33M parameters, 2023) and BGE-M3 (568M parameters, 2024, the model Liu and Zhai used) |
-| **Judge** | Qwen2.5-3B-Instruct (September 2024), on Ai2's reference prompt and two of its prompt variants: vague criteria and no criteria. The prompts are loaded from [Ai2's own code](https://github.com/allenai/novelty-eval) at a pinned commit. |
+| **Judges** | Qwen2.5-3B-Instruct (September 2024), on Ai2's reference prompt and two of its prompt variants: vague criteria and no criteria. Qwen3-4B (April 2025), on the reference prompt with its thinking mode off and on. The prompts are loaded from [Ai2's own code](https://github.com/allenai/novelty-eval) at a pinned commit. |
 | **Metrics** | Ai2's metrics, plus 95% bootstrap confidence intervals, exact McNemar tests between conditions on the same pairs, and AUROC |
-| **Hardware** | One free Colab T4 GPU. A first run takes about two hours, most of it embedding the corpus. |
+| **Hardware** | One free Colab T4 GPU. The main run takes about two hours, most of it embedding the corpus. Qwen3-4B with thinking on adds about 3.5 hours. |
 
-Every model was released before the ICLR 2026 submissions existed, so none of them can have seen the papers or the reviews.
+Every model was released before the ICLR 2026 deadline, and well before the reviews that supply the labels.
 
 ### The leakage filter
 
 Many ICLR submissions were on arXiv months before the deadline. A naive search would find each idea's own preprint, measure a distance of nearly zero, and call it unoriginal. So any paper matching an idea's OpenReview ID or title, or with cosine similarity of 0.95 or more, was dropped from that idea's neighbours and logged.
 
-That removed 31 matching preprints by ID or title, and 24 near-copies by similarity. Most near-copies were obviously the same work under a new title: "Image Quality Assessment for Embodied AI" matched "Perceptual Quality Assessment for Embodied AI" at 0.999. A few at the threshold were genuinely different earlier papers, such as the benchmark MT-Eval, matched to "LLMs Get Lost In Multi-Turn Conversation" at 0.951. Any fixed threshold trades one error for the other, and this one leans towards removing too much rather than too little.
+That removed 31 matching preprints by ID or title, and 24 near-copies by similarity. Most near-copies were obviously the same work under a new title, such as "Image Quality Assessment for Embodied AI" and "Perceptual Quality Assessment for Embodied AI" at 0.999. A few at the threshold were genuinely different earlier papers, so the filter leans towards removing too much rather than too little.
 
-### The judge, run cheaply
+### The judges, run cheaply
 
-Ai2's judges reason at length and pool three samples per verdict. I read the verdict straight from the model's probabilities for "0" and "1" after an empty reasoning block, which is fast and deterministic. I also ran every pair in both orders and averaged the two probabilities, for a reason that becomes clear below.
+Ai2's judges reason at length and pool three samples per verdict. For the 3B judge, I read the verdict straight from the model's probabilities for "0" and "1" after an empty reasoning block, which is fast and deterministic. Qwen3-4B was read the same way, once with its reasoning block left empty and once after it had written its reasoning there. I ran every pair in both orders and averaged the two probabilities, for a reason that becomes clear below.
 
 ## Results: which of two ideas is more novel?
 
 ![Pairwise accuracy on the 154 human-written pairs. The frontier judges' numbers are read off Figure 4 of Ai2's paper.](figures/headline_human_only.png)
 
-With BGE-M3, Yin's distance picked the more novel idea 60% of the time. The 3B judge scored 55% to 58% across the three prompts. On the pairs where one was right and the other wrong, neither won significantly (McNemar p = 0.33 to 0.71), and the judge itself was not significantly above chance with any prompt.
+With BGE-M3, Yin's distance picked the more novel idea 60% of the time. The 3B judge scored 55% to 58% across the three prompts. On the pairs where one was right and the other wrong, neither won significantly (McNemar p = 0.33 to 0.71), and the 3B judge was not significantly above chance with any prompt.
 
-Ai2's frontier judges (Claude Sonnet 4.5, Opus 4.5 and 4.6, GPT-5.1, 5.2 and 5.4) scored 74% to 84%. That gap is the clearest result here: both cheap methods sit roughly halfway between chance and the frontier.
+Qwen3-4B was a different story: 69% with thinking off and 72% with it on. With thinking on, it beat the 3B judge on the same prompt (38 pairs against 11, p < 0.001) and BGE-M3 distance (37 against 19, p = 0.022). Ai2's frontier judges (Claude Sonnet 4.5, Opus 4.5 and 4.6, GPT-5.1, 5.2 and 5.4) scored 74% to 84%, so a 4B model on a free GPU landed 2 points behind the weakest of them and 12 behind the best.
 
 All three distance metrics on the Human-Only pairs:
 
@@ -95,26 +101,26 @@ All three distance metrics on the Human-Only pairs:
 | kNN density (10 nearest) | 49% | 58% |
 | RND | 57% | 55% |
 
-With BGE-M3, the ranking matches Liu and Zhai's: the simplest metric wins. Combining BGE-M3 distance with the judge in a cross-validated regression added nothing (60% either way).
+With BGE-M3, the ranking matches Liu and Zhai's: the simplest metric wins. Combining BGE-M3 distance with the 3B judge in a cross-validated regression added nothing (60% either way).
 
 A caveat on that 60%: I tested six embedding conditions per split, and after a Bonferroni correction for that (p below 0.008), none clears the bar. The uncorrected p-value is 0.012. I'd call it suggestive, not shown.
 
-## Results: scoring one idea at a time
+## Does reasoning help?
 
-On single ideas, the judge did better than distance.
+Ai2's judges think before they answer; the 3B judge never did. Qwen3-4B is a hybrid model, trained to work with its thinking mode either on or off, so the same model with the same prompt can be run both ways. With thinking on, it wrote a median of about 840 tokens of reasoning before each verdict, typically summarising both ideas, going through Ai2's criteria one by one and then picking a side.
 
-| Condition | CV macro-F1 | AUROC |
-|---|---|---|
-| Yin, bge-small | 0.55 | 0.54 |
-| Yin, BGE-M3 | 0.58 | 0.57 |
-| RND, bge-small | 0.56 | 0.59 |
-| 3B judge, reference prompt | 0.56 | 0.64 |
-| 3B judge, no criteria | 0.62 | 0.68 |
-| Ai2's frontier judges, reference prompt (yes/no verdicts) | 0.61 to 0.81 | |
+| Qwen3-4B, reference prompt | Human-Only accuracy | 95% CI | Order flips | Time per 100 prompts |
+|---|---|---|---|---|
+| Thinking off | 69% | 61% to 76% | 64% | about 80 seconds |
+| Thinking on | 72% | 65% to 79% | 45% | about 35 minutes |
 
-Distance has no natural cut-off, so each score gets a threshold chosen by cross-validation (CV macro-F1). AUROC measures how well a score separates the two groups at any threshold.
+Reasoning added 3 points. Thinking on got 13 pairs right that thinking off got wrong, against 8 the other way (p = 0.38), so on these pairs the gain is within noise, at about 27 times the cost. The bigger jump came from the model itself: even with thinking off, Qwen3-4B scored 14 points above the 3B judge on the same prompt.
 
-One oddity: the 3B judge said "novel" to almost every idea. Its probability of "novel" sat close to 1.0 for nearly all of them, so with Ai2's plain 50% cut-off its F1 was only 0.35 to 0.40. The signal is there, as the AUROC shows, but only in tiny differences near the top of the scale.
+Three things in the reasoning traces are worth knowing before you rely on that 72%:
+
+- **It still prefers the second idea.** With thinking on, it picked the second idea 72% of the time. It was right on 88% of prompts when the more novel idea came second, and on only 44% when it came first. Averaging both orders is what gets it to 72%; in a single order it scored 66%.
+- **Long reasoning went with wrong answers.** I capped reasoning at 1,024 tokens, and a third of the traces hit the cap. Those were at chance (50%), against 74% for traces that finished. Accuracy fell steadily with length: 78% for the shortest third and 51% for the longest. That could mean the cap was too tight, or that hard pairs simply make the model think longer. This run can't tell those apart.
+- **No sign that it had seen the papers.** Qwen3's training data reportedly runs to about March 2025, by which time some submissions were on arXiv. Accuracy was the same whether or not a pair included an idea with a preprint in my corpus (65% and 66%). That is a weak check, but the labels come from reviews written months after the model was released, so it can't have seen those.
 
 ## The embedding model matters as much as the metric
 
@@ -124,9 +130,9 @@ More striking was how much the two models disagree about what counts as nearby. 
 
 So a distance score isn't free of configuration choices. For a judge, the prompt is the setting that can quietly change the answer. For distance, it's the embedding model.
 
-## The judge's weakness was order, not wording
+## The judges' weakness was order, not wording
 
-Ai2's headline finding was prompt sensitivity, so I ran the judge on three of their prompts. Wording barely moved it:
+Ai2's headline finding was prompt sensitivity, so I ran the 3B judge on three of their prompts. Wording barely moved it:
 
 | Judge | Spread across the three prompts, Human-Only | Spread, Human+Generated |
 |---|---|---|
@@ -135,13 +141,13 @@ Ai2's headline finding was prompt sensitivity, so I ran the judge on three of th
 
 On these three prompts, the small judge is about as stable as the frontier ones. Ai2's swings of more than 50 points come from other prompt variants that I didn't run.
 
-Order was the real problem. When I swapped which idea came first, the judge's verdict flipped on 87% of Human-Only pairs with the reference prompt, and on 53% to 61% with the other two. Most of the time it was picking a position, not an idea. Averaging both orders cancels that out, which is why I ran every pair twice. If you use a small model as a pairwise judge, I'd treat order-swapping as mandatory.
+Order was the real problem. When I swapped which idea came first, the 3B judge's verdict flipped on 87% of Human-Only pairs with the reference prompt, and on 53% to 61% with the other two. Most of the time it was picking a position, not an idea. Qwen3-4B was better but far from immune: 64% with thinking off and 45% with it on, and some of that 45% is just sampling noise, since each order got one sample. Averaging both orders cancels position bias out, which is why I ran every pair twice. If you use a small model as a pairwise judge, I'd treat order-swapping as mandatory.
 
 ## What distance gets right, and what it can't see
 
 Two pairs from the results show both sides.
 
-**Where distance was right and the judge wrong.** "LLM Pretraining with Continuous Concepts" (praised by reviewers) against "InfiMed-Foundation", a medical multimodal model (faulted). The nearest earlier paper to InfiMed-Foundation was "Infi-Med: Low-Resource Medical MLLMs with Robust Reasoning Evaluation", which appears to be earlier work from the same project. Distance saw that closeness straight away, and the judge leaned the other way.
+**Where distance was right and the judge wrong.** "LLM Pretraining with Continuous Concepts" (praised by reviewers) against "InfiMed-Foundation", a medical multimodal model (faulted). The nearest earlier paper to InfiMed-Foundation was "Infi-Med: Low-Resource Medical MLLMs with Robust Reasoning Evaluation", which appears to be earlier work from the same project. Distance saw that closeness straight away, and the 3B judge leaned the other way.
 
 **Where both were wrong.** "Lipschitz Bandits with Stochastic Delayed Feedback" (praised) sat very close to "Delayed Feedback in Generalised Linear Bandits Revisited", so distance rated it unoriginal. But a new combination of known ingredients can be exactly what reviewers call novel, which is close to the point of Ai2's title. Distance can tell you an idea is near existing work. It can't tell you whether the step it takes is a meaningful one.
 
@@ -151,42 +157,42 @@ Two pairs from the results show both sides.
 
 On Human+Generated, every pair sets a praised human idea against one written by Claude Sonnet 4.5. The numbers on the right of the chart look wild, and none of them should be read as novelty accuracy:
 
-- **The 3B judge preferred the LLM-written idea 94% of the time.** Ai2's own Sonnet 4.5 judge, the model that wrote those ideas, picked the human idea in only 40% of pairs.
+- **Both small judges preferred the LLM-written idea.** The 3B judge did so 94% of the time. Qwen3-4B scored 8% to 9%, and reasoning didn't change that. Ai2's own Sonnet 4.5 judge, the model that wrote those ideas, picked the human idea in only 40% of pairs.
 - **bge-small distance rated the LLM-written idea as more novel in 64% of pairs**, which put it below chance.
 - **BGE-M3's RND scored 71%**, which looks impressive until you see it reaches only 55% when both ideas are human. It ranked the LLM-written idea lower in 73% of pairs, so it is most likely picking up LLM writing rather than novelty.
-- **The combined score reached 95%**, because the regression learned to flip a judge that was reliably wrong. That is not the two scores agreeing.
+- **Combining distance with the 3B judge reached 95%**, because the regression learned to flip a judge that was reliably wrong. That is not the two scores agreeing.
 
 If you want to compare human and LLM-generated ideas for novelty, this is the warning: every method here reacts to who wrote the text.
 
 ## Is any score measuring quality instead?
 
-The two groups come from opposite ends of the rating distribution, so a score could separate them by tracking how good a paper is rather than how new. Within each group, every idea carries the same novelty label but ratings still vary, so a strong link to rating inside a group would point to quality.
+The two groups come from opposite ends of the rating distribution, so a score could separate them by tracking how good a paper is rather than how new. Within a group, every idea has the same novelty label, so a strong link to rating there would point to quality. There wasn't one: no score correlated with reviewer rating beyond 0.14 within either group, and none significantly. Ratings within a group span a narrow range, which limits this check, and it doesn't cover Qwen3-4B, which I ran on pairs only.
 
-There wasn't one. No score correlated with reviewer rating beyond 0.14 within either group, and none significantly. The ratings within each group span a narrow range, which limits how much this check can detect, but nothing suggests any score is quietly measuring quality.
+## Single ideas and cost
 
-## Cost
+On single ideas, the 3B judge did better than distance: AUROC 0.64 to 0.68 across its prompts, against 0.57 for BGE-M3 Yin and at most 0.59 for any distance score. It also said "novel" to almost every idea, so with Ai2's plain 50% cut-off its macro-F1 was only 0.35 to 0.40. The signal was there, but only in tiny differences near the top of the scale. Ai2's frontier judges, giving yes or no verdicts, reached 0.61 to 0.81.
 
-| | Time per 100 ideas on a T4 | Notes |
+| | Time on a T4 | Notes |
 |---|---|---|
-| Distance, bge-small | about 1 second | after a one-off embedding of the corpus |
-| Distance, BGE-M3 | about 3 seconds | after a one-off embedding of the corpus |
-| Qwen2.5-3B judge | 20 to 40 seconds | depending on prompt length |
+| Distance, bge-small | about 1 second per 100 ideas | after a one-off embedding of the corpus |
+| Distance, BGE-M3 | about 3 seconds per 100 ideas | after a one-off embedding of the corpus |
+| Qwen2.5-3B judge | 20 to 40 seconds per 100 ideas | depending on prompt length |
+| Qwen3-4B, thinking off | about 80 seconds per 100 pair prompts | |
+| Qwen3-4B, thinking on | about 35 minutes per 100 pair prompts | 3.5 hours for both splits |
 | Ai2's frontier judges | API fees | about $15,000 for Ai2's whole study |
-
-The corpus embedding is the expensive part of distance, and it is paid once. After that, scoring a new idea is a single embedding and a nearest-neighbour search.
 
 ## When I'd use distance, and when I wouldn't
 
 **I'd use it as a cheap first pass.** It is repeatable and fast, and the nearest titles give a reviewer or a stronger judge something concrete to check. That makes it good for flagging ideas that sit very close to existing work, and for supplying related papers to a better judge.
 
-**I wouldn't use it to rank ideas on its own.** Frontier judges are 14 to 24 points ahead. I also wouldn't use it to compare human and LLM-written ideas, or trust one embedding model's verdict without trying a second.
+**I wouldn't use it to rank ideas on its own.** Frontier judges are 14 to 24 points ahead, and a 4B open model on the same free GPU is 8 to 12 points ahead. I also wouldn't use it to compare human and LLM-written ideas, or trust one embedding model's verdict without trying a second.
 
-**I wouldn't use a small model as a pairwise judge without swapping the order.** Its verdict depended more on position than on content.
+**If I wanted a cheap local judge, I'd start with a recent small model, without reasoning, run in both orders.** Qwen3-4B with thinking off finished about 5 points behind the weakest frontier judge for 80 seconds per 100 prompts. Reasoning bought 3 points that might not be real, for 35 minutes per 100.
 
 ## Limitations
 
 - **154 pairs per split.** Each accuracy has a confidence interval of about 8 points either side, and with this many conditions, some results below p = 0.05 are expected by chance.
-- **The judge is small and didn't reason.** Reading probabilities after an empty reasoning block understates what Qwen2.5-3B can do. It is a cheap baseline, not a rerun of Ai2's judges.
+- **The judges are not run the way Ai2 ran theirs.** The verdicts come from probabilities rather than written answers. Qwen3-4B sampled its reasoning once per order and was capped at 1,024 tokens, while Ai2's judges reason at length and pool three samples. A third of Qwen3's traces hit the cap, so a longer budget might change its with-reasoning score.
 - **One corpus snapshot.** Papers with Code ends in July 2025 and leans towards papers with code and benchmarks, so recent or theory-heavy prior work is missing, which makes some ideas look more novel than they are.
 - **The leakage filter is a blunt tool.** A heavily rewritten preprint below 0.95 still counts as prior work against its own idea, and a few genuinely earlier papers above it were removed.
 - **Rewritten ideas, raw corpus.** The benchmark ideas are abstracts Ai2 rewrote with Claude Opus 4.6 to strip out results, while the corpus holds original abstracts. For the 31 ideas whose original is in the corpus, the rewrite moved each text far less than the distance to its nearest other paper: median cosine to its own original was 0.99 with bge-small and 0.98 with BGE-M3, against 0.91 and 0.77 to the nearest other paper. A shift shared by all ideas cancels out in pairs, but the part that varies from idea to idea adds noise unrelated to novelty, and may be part of why distance tops out around 60%. BGE-M3 also put 8 of those 31 ideas below 0.95 from their own original, so its cosine threshold alone would have missed them; the ID and title check caught them. On Human+Generated, both sides are LLM text (Opus rewrites of real abstracts against ideas Sonnet 4.5 wrote from scratch), so that split's effect is best read as real-paper ideas against generated ones, whether through content or style.
@@ -194,13 +200,13 @@ The corpus embedding is the expensive part of distance, and it is paid once. Aft
 
 ## What I'd test next
 
-- **A frontier judge given the nearest papers that distance finds**, so it judges with evidence rather than memory. Ai2 found that related papers helped their judges little; this would test whether the nearest neighbours from a large corpus do any better.
-- **Ai2's other prompt variants** on the small judge, to see whether it shows the same large swings.
-- **A different leakage threshold**, such as 0.96, to see how sensitive the distance results are to it.
+- **Qwen3-4B with a longer reasoning budget**, such as 2,048 tokens, to see whether the traces that hit the cap were cut short or just faced hard pairs.
+- **A judge given the nearest papers that distance finds**, so it judges with evidence rather than memory. Ai2 found that related papers helped their judges little; this would test whether the nearest neighbours from a large corpus do any better, and Qwen3-4B makes it cheap to try.
+- **Ai2's other prompt variants** on the small judges, to see whether they show the same large swings.
 
 ## Try it yourself
 
-The notebook runs top to bottom on a free Colab GPU, with the corpus embeddings and judge outputs cached on Google Drive so a disconnect doesn't lose work. No API keys are needed.
+The notebook runs top to bottom on a free Colab GPU, with the corpus embeddings and judge outputs cached on Google Drive so a disconnect doesn't lose work. No API keys are needed. The Qwen3-4B condition is off by default; one setting switches it on.
 
 Thanks to Ai2 for the benchmark and for publishing their prompts and code, to the Papers with Code archive maintainers, and to BAAI and the Qwen team for the models.
 
